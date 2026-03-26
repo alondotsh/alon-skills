@@ -9,7 +9,7 @@
 计划中的公开安装方式：
 
 ```bash
-npx skills add <owner>/alon-skills --skill alon-github-security-audit
+npx skills add alondai/alon-skills --skill alon-github-security-audit
 ```
 
 当前私有开发阶段的本地安装方式：
@@ -41,14 +41,16 @@ ls -l ~/.claude/skills/alon-github-security-audit
 - 检查网络指纹、数据外传路径、混淆内容与安装链
 - 对 skill 和自动化工具增加来源与权限预检
 - 经用户确认后可补充联网依赖漏洞情报检查
-- 输出结构化审计报告，便于归档和复查
+- 输出结构化审计报告，写入本地报告目录，便于归档和复查
 
 ## 安全边界与限制
 
 - 默认模式是只读静态分析
+- 默认分析范围只限于目标仓库或当前工作目录
 - 不执行目标仓库代码
 - 不运行 `npm install`、`pip install` 等安装命令
 - 未经用户明确同意，不访问外部漏洞情报源
+- 未经用户明确扩展范围，不读取 `~/.ssh`、浏览器资料目录等无关 home 路径
 - 对本地目录审计时不会删除用户文件
 
 这个 skill 适合做审计和分诊，不负责证明运行时漏洞是否可利用。
@@ -61,7 +63,7 @@ ls -l ~/.claude/skills/alon-github-security-audit
 - 逻辑风险分析
 - 补充安全检查结果
 - 最终结论：`Safe`、`Risky` 或 `Dangerous`
-- 写入本地笔记目标位置的审计报告
+- 写入本地报告目录的审计报告
 
 ## 项目结构
 
@@ -84,6 +86,8 @@ alon-github-security-audit/
 - Git
 
 这个目录是私有 canonical source，可以保留宿主相关和个人工作流相关细节。真正公开发布时，再做 public-safe 导出和清洗。
+
+当前私有工作流中，报告先写入本地报告目录，后续如需进入 Obsidian，再由单独工具链处理。
 
 ## License
 

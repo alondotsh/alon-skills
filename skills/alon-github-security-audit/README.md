@@ -9,7 +9,7 @@ Audit GitHub repositories or local codebases for malicious code, backdoors, and 
 Planned public install path:
 
 ```bash
-npx skills add <owner>/alon-skills --skill alon-github-security-audit
+npx skills add alondai/alon-skills --skill alon-github-security-audit
 ```
 
 Current local install path during private development:
@@ -41,14 +41,16 @@ Typical user prompts:
 - inspects network indicators, exfiltration paths, obfuscation, and install chains
 - adds a source-and-permissions preflight for skills and automation tools
 - can optionally extend into online dependency vulnerability intelligence after confirmation
-- writes a structured audit report for later review
+- writes a structured audit report to the configured local report directory
 
 ## Safety and Limits
 
 - default mode is read-only static analysis
+- default analysis scope is limited to the target repository or the current working directory
 - it does not execute target repository code
 - it does not run `npm install`, `pip install`, or similar install steps
 - it does not query external vulnerability sources unless the user explicitly approves
+- it does not read unrelated home-directory paths such as `~/.ssh` or browser profile data unless the user explicitly expands scope
 - local-directory audits do not delete user files
 
 This skill is designed for triage and security review, not for proving runtime exploitability.
@@ -61,7 +63,7 @@ The audit result includes:
 - logic risk analysis
 - optional supplemental checks
 - a final verdict: `Safe`, `Risky`, or `Dangerous`
-- an audit report written to the configured local notes destination
+- an audit report written to the configured local report directory
 
 ## Project Structure
 
@@ -84,6 +86,8 @@ alon-github-security-audit/
 - Git
 
 The canonical private source lives in the local skills workspace and may contain host-specific private workflow details. Public-safe export cleanup should happen later during release export, not during private development.
+
+In the current private workflow, reports are written to a local report directory and may later be imported into Obsidian by separate tooling.
 
 ## License
 
