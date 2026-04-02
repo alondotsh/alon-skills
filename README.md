@@ -18,12 +18,6 @@ Install all skills from this repository for the current/default agent:
 npx skills add alondai/alon-skills --skill '*'
 ```
 
-Install all skills for all supported agents:
-
-```bash
-npx skills add alondai/alon-skills --all
-```
-
 ## Available Skills
 
 ### `alon-github-security-audit`

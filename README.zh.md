@@ -18,12 +18,6 @@ npx skills add alondai/alon-skills --skill <skill-name>
 npx skills add alondai/alon-skills --skill '*'
 ```
 
-为所有支持的 agents 安装本仓库中的全部 skills：
-
-```bash
-npx skills add alondai/alon-skills --all
-```
-
 ## 当前 Skills
 
 ### `alon-github-security-audit`
