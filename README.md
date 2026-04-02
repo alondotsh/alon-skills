@@ -6,16 +6,10 @@ Public agent skills by Alon for Claude, Codex, Gemini, and OpenClaw.
 
 ## Install
 
-Install a skill with `skills`:
+Install any skill in this repository with:
 
 ```bash
 npx skills add alondai/alon-skills --skill <skill-name>
-```
-
-Example:
-
-```bash
-npx skills add alondai/alon-skills --skill alon-github-security-audit
 ```
 
 ## Available Skills
@@ -24,17 +18,21 @@ npx skills add alondai/alon-skills --skill alon-github-security-audit
 
 Audit a GitHub repository or local codebase for malicious code, backdoors, suspicious network behavior, credential theft patterns, obfuscation, and supply-chain risk.
 
-Path:
+Install:
 
-`skills/alon-github-security-audit`
+```bash
+npx skills add alondai/alon-skills --skill alon-github-security-audit
+```
 
 ### `alon-search-skill-plus`
 
 Search Claude Code skills across trusted directories, ClawHub, and GitHub adaptation candidates with explicit ranking and safety filters.
 
-Path:
+Install:
 
-`skills/alon-search-skill-plus`
+```bash
+npx skills add alondai/alon-skills --skill alon-search-skill-plus
+```
 
 ## Compatibility
 

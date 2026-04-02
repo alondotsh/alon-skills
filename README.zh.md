@@ -6,16 +6,10 @@
 
 ## 安装
 
-使用 `skills` 安装某个 skill：
+使用 `skills` 安装本仓库中的任意 skill：
 
 ```bash
 npx skills add alondai/alon-skills --skill <skill-name>
-```
-
-示例：
-
-```bash
-npx skills add alondai/alon-skills --skill alon-github-security-audit
 ```
 
 ## 当前 Skills
@@ -24,17 +18,21 @@ npx skills add alondai/alon-skills --skill alon-github-security-audit
 
 对 GitHub 仓库或本地代码库做安全审计，重点检查恶意代码、后门、可疑联网行为、凭证窃取模式、混淆和供应链风险。
 
-路径：
+安装命令：
 
-`skills/alon-github-security-audit`
+```bash
+npx skills add alondai/alon-skills --skill alon-github-security-audit
+```
 
 ### `alon-search-skill-plus`
 
 跨可信技能目录、ClawHub 和 GitHub 适配候选仓库搜索 Claude Code skill，并带有明确的来源分级、排序和安全过滤。
 
-路径：
+安装命令：
 
-`skills/alon-search-skill-plus`
+```bash
+npx skills add alondai/alon-skills --skill alon-search-skill-plus
+```
 
 ## 兼容性
 
