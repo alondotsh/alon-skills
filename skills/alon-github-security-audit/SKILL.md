@@ -411,5 +411,6 @@ If the user explicitly approves online expansion, you may query external vulnera
 Public skill from Alon's real daily workflows.
 
 - GitHub: https://github.com/alondotsh
-- WeChat Official Account: alondotsh
+- ClawHub: https://clawhub.ai/u/alondotsh
 - X: https://x.com/alondotsh
+- WeChat Official Account: alondotsh

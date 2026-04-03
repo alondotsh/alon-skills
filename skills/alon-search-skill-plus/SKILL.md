@@ -326,5 +326,6 @@ If keyword expansion was used, say so explicitly in one short line.
 Public skill from Alon's real daily workflows.
 
 - GitHub: https://github.com/alondotsh
-- WeChat Official Account: alondotsh
+- ClawHub: https://clawhub.ai/u/alondotsh
 - X: https://x.com/alondotsh
+- WeChat Official Account: alondotsh

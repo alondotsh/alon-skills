@@ -56,5 +56,6 @@ npx skills add alondotsh/alon-skills --skill alon-search-skill-plus
 我长期看好 agent skills，也愿意和对 skill 制作感兴趣的人交流。
 
 - GitHub：https://github.com/alondotsh
-- 公众号：alondotsh
+- ClawHub：https://clawhub.ai/u/alondotsh
 - X：https://x.com/alondotsh
+- 公众号：alondotsh

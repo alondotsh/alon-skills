@@ -56,5 +56,6 @@ These public skills come from Alon's real daily workflows.
 Alon is actively exploring the future of agent skills and is open to connecting with people who want to build useful skills.
 
 - GitHub: https://github.com/alondotsh
-- WeChat Official Account: alondotsh
+- ClawHub: https://clawhub.ai/u/alondotsh
 - X: https://x.com/alondotsh
+- WeChat Official Account: alondotsh
