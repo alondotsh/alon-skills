@@ -1,7 +1,7 @@
 ---
 name: alon-github-security-audit
 description: 对 GitHub 仓库或本地目录进行全栈安全审计，检测恶意代码、后门和供应链攻击，生成报告写入本地审计目录。当用户说"审计下"、"审计一下"、"安全审计"、"检查下这个仓库"、"审计当前目录"、"审计本地项目"、"check repo"、"audit" 时立即触发。支持 GitHub URL 或本地目录。
-version: 0.1.3
+version: 0.1.4
 metadata:
   homepage: https://github.com/alondotsh/alon-skills/tree/master/skills/alon-github-security-audit
   requires:
