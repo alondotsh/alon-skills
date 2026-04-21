@@ -1,8 +1,10 @@
 # Python
+resume.md
 *.pyc
 __pycache__/
 *.py[cod]
 *$py.class
+runtime/
 
 # 测试和演示生成的文件
 demo-reports/
