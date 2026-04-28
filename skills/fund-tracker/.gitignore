@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+*.pyc
+runtime/
+history_*.json
+resume.md
