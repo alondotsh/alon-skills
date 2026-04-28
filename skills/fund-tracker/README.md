@@ -6,6 +6,14 @@ Track fund purchase availability, daily purchase quotas, fees, and changes since
 
 ## Quick Install
 
+Install the skill:
+
+```bash
+npx skills add alondotsh/alon-skills --skill fund-tracker
+```
+
+Then install the Python runtime dependencies inside the installed skill directory:
+
 ```bash
 pip install -r tools/requirements.txt
 ```

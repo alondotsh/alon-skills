@@ -6,6 +6,14 @@
 
 ## 快速安装
 
+先安装 skill：
+
+```bash
+npx skills add alondotsh/alon-skills --skill fund-tracker
+```
+
+然后在安装后的 skill 目录中安装 Python 运行依赖：
+
 ```bash
 pip install -r tools/requirements.txt
 ```
