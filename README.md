@@ -22,7 +22,7 @@ npx skills add alondotsh/alon-skills --skill '*'
 
 ### `alon-github-security-audit`
 
-Audit a GitHub repository or local codebase for malicious code, backdoors, suspicious network behavior, credential theft patterns, obfuscation, and supply-chain risk.
+Audit GitHub repositories or local codebases for malicious code, backdoors, and supply-chain risk without executing the target project by default.
 
 Install:
 
@@ -32,12 +32,22 @@ npx skills add alondotsh/alon-skills --skill alon-github-security-audit
 
 ### `alon-search-skill-plus`
 
-Search agent skills across trusted directories, ClawHub, and GitHub adaptation candidates with explicit ranking and safety filters.
+Search agent skills across trusted directories, ClawHub, and GitHub adaptation candidates with explicit source ranking and security filtering.
 
 Install:
 
 ```bash
 npx skills add alondotsh/alon-skills --skill alon-search-skill-plus
+```
+
+### `fund-tracker`
+
+Track fund purchase availability, daily purchase quotas, fees, and changes since the previous run with AKShare.
+
+Install:
+
+```bash
+npx skills add alondotsh/alon-skills --skill fund-tracker
 ```
 
 ## Compatibility

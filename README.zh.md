@@ -22,7 +22,7 @@ npx skills add alondotsh/alon-skills --skill '*'
 
 ### `alon-github-security-audit`
 
-对 GitHub 仓库或本地代码库做安全审计，重点检查恶意代码、后门、可疑联网行为、凭证窃取模式、混淆和供应链风险。
+在默认不执行目标项目代码的前提下，对 GitHub 仓库或本地代码目录进行恶意代码、后门和供应链风险审计。
 
 安装命令：
 
@@ -32,12 +32,22 @@ npx skills add alondotsh/alon-skills --skill alon-github-security-audit
 
 ### `alon-search-skill-plus`
 
-跨可信技能目录、ClawHub 和 GitHub 适配候选仓库搜索 agent skill，并带有明确的来源分级、排序和安全过滤。
+用于跨可信技能目录、ClawHub 和 GitHub 适配候选仓库搜索 agent skill，并带有明确的来源分级、排序和安全过滤。
 
 安装命令：
 
 ```bash
 npx skills add alondotsh/alon-skills --skill alon-search-skill-plus
+```
+
+### `fund-tracker`
+
+使用 AKShare 跟踪基金申购状态、日限额、手续费，以及相对上次运行的变化。
+
+安装命令：
+
+```bash
+npx skills add alondotsh/alon-skills --skill fund-tracker
 ```
 
 ## 兼容性
