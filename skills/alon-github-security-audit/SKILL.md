@@ -391,9 +391,30 @@ Determine the output directory using this priority:
 
 1. a directory explicitly specified by the user
 2. an existing audit-report directory already established by the current runtime
-3. the default recommendation: `~/Security-Audit/`
+3. the `report_directory` value in `<skill-root>/config/defaults.json`, if present
+4. a local fallback directory such as `~/Security-Audit/`
 
-Default output path: `~/Security-Audit/`
+Default output path:
+
+- use the user-provided report directory when specified
+- otherwise use the current runtime's configured report directory when available
+- otherwise read `<skill-root>/config/defaults.json` and use its `report_directory` value when present
+- otherwise use `~/Security-Audit/` as a local fallback
+
+Local configuration:
+
+- committed example: `<skill-root>/config/defaults.example.json`
+- local private config: `<skill-root>/config/defaults.json`
+- do not commit `config/defaults.json`; it may contain private local paths
+- if `config/defaults.json` is missing, do not create it automatically; use the fallback directory and include a one-line optional setup hint in the final output
+
+To initialize a local private default from the example, run:
+
+```bash
+cp config/defaults.example.json config/defaults.json
+```
+
+Then edit `config/defaults.json` if a different report directory is needed.
 
 File name pattern:
 
@@ -617,7 +638,10 @@ Injection/Trigger Paths: <summary or None>
 [Installation Recommendation]
 <Installable / Use Caution / Do Not Install for skill or agent install scenarios; otherwise Not Applicable>
 
-Report saved to: ~/Security-Audit/YYYYMMDD-<target>-SecurityAudit-<verdict>.md
+Optional setup hint:
+<If config/defaults.json was missing, write: "Optional: create config/defaults.json from config/defaults.example.json to set a persistent report directory."; otherwise omit this line.>
+
+Report saved to: <resolved-report-directory>/YYYYMMDD-<target>-SecurityAudit-<verdict>.md
 ```
 
 ## Safety Boundaries

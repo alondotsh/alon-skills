@@ -1,5 +1,6 @@
 # Python
 resume.md
+config/defaults.json
 *.pyc
 __pycache__/
 *.py[cod]
