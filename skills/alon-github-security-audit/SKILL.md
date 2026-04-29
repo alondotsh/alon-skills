@@ -1,7 +1,7 @@
 ---
 name: alon-github-security-audit
-description: USE WHEN user wants to audit a GitHub repository or local directory for malicious code, backdoors, suspicious behavior, or supply-chain risk before trusting or installing it. Performs a static-first security review, adds source and permission preflight for agent and automation repos, and writes a structured report to a local audit directory.
-version: 0.1.8
+description: USE WHEN user wants to audit a GitHub repository or local directory for malicious code, backdoors, suspicious behavior, or supply-chain risk before trusting or installing it. Performs a static-first security review, separates user-safety verdicts from maintainer exposure and future supply-chain risk, and writes a structured report to a local audit directory.
+version: 0.1.9
 metadata:
   homepage: https://github.com/alondotsh/alon-skills/tree/master/skills/alon-github-security-audit
   requires:
@@ -13,6 +13,8 @@ metadata:
 # GitHub Security Audit Skill
 
 Perform a comprehensive security audit of a GitHub repository or a local code directory without executing the target project by default.
+
+The primary verdict is from the perspective of a potential user or installer. Maintainer-secret exposure and future supply-chain risk are secondary signals unless they create a credible path to user harm.
 
 This skill is CIK-aware for agent and automation repositories:
 
@@ -79,13 +81,13 @@ Unless the user explicitly expands scope, do not proactively read unrelated home
 Prompt the user only after all of the following are true:
 
 - the offline static audit is complete
-- the project clearly contains dependency manifests such as `package.json`, `package-lock.json`, or `npm-shrinkwrap.json`
+- the project clearly contains dependency manifests or lockfiles
 - the user wants a more complete dependency-vulnerability conclusion, or the offline audit found dependency risk that needs confirmation
 
 Recommended prompt:
 
 ```text
-This project includes Node.js dependency manifests. I can continue with online dependency vulnerability intelligence (for example, lockfile-based vulnerability checks), which will access external vulnerability databases. Do you want me to continue?
+This project includes dependency manifests or lockfiles. I can continue with online dependency vulnerability intelligence, which will access external vulnerability databases. Do you want me to continue?
 ```
 
 Do not ask this at the beginning unless the user explicitly requests a full audit that includes dependency vulnerability scanning.
@@ -143,9 +145,9 @@ Before the five-step analysis, produce a compact summary of:
 
 #### 2.4 Installation Recommendation Mapping
 
-For skill or agent installation scenarios, map the audit verdict into an installation recommendation:
+For skill or agent installation scenarios, map the primary user-safety verdict into an installation recommendation. Use secondary signals as supporting context, and let them change the recommendation only when they create a credible user-impacting path.
 
-| Audit Verdict | Installation Recommendation | Meaning |
+| User Safety Verdict | Installation Recommendation | Meaning |
 |------|------|------|
 | `Safe` | `Installable` | No malicious chain found in current static evidence, and permissions mostly match the purpose |
 | `Risky` | `Use Caution` | Suspicious signals, incomplete information, or over-broad permissions exist |
@@ -196,8 +198,12 @@ Review:
 - persistence and cleanup: are there signs of background persistence, scheduled tasks, startup hooks, log clearing, or history wiping?
 - persistent-state modification surface: does the repository read or write long-lived agent-control files, and can those changes persist into future sessions?
 - persistent-state semantics: do writes to `USER.md`, `MEMORY.md`, `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, or `SKILL.md` introduce fabricated facts, trust-boundary changes, approval bypasses, or hidden executable capability?
+- maintainer exposure: are developer secrets, publish credentials, CI tokens, cloud keys, or internal service credentials present, and do they affect maintainers, users, or downstream package consumers?
+- supply-chain determinism: are dependencies, CI actions, containers, install commands, and release paths pinned and reproducible enough to reduce future package poisoning risk?
 
-If reliable qualification is impossible, do not mark the project `Safe`. Raise it to at least `Risky`.
+If reliable qualification of a user-impacting suspicious chain is impossible, do not mark the user-safety verdict `Safe`. Raise it to at least `Risky`.
+
+If the uncertainty is limited to maintainer exposure or future supply-chain hygiene, keep the user-safety verdict separate and raise the relevant secondary signal instead.
 
 #### 3.1 Default Supplemental Checks
 
@@ -235,7 +241,29 @@ Qualification rules:
 - decodable and part of a dangerous chain -> lean toward `Dangerous`
 - not reliably decodable or too ambiguous -> at least `Risky`, never `Safe`
 
-#### 3.1.1 Persistent State and Agent Control Surface Review
+#### 3.1.1 Role-Specific Risk Model
+
+Keep risk conclusions role-aware:
+
+- `User Safety Verdict`: primary conclusion for a potential user or installer
+- `Maintainer Exposure`: secondary signal for leaked developer, CI, cloud, publishing, or project-owner secrets
+- `Supply Chain Risk`: secondary signal for future dependency, registry, CI, release, or installer compromise exposure
+
+Important qualification rules:
+
+- Do not collapse maintainer-secret exposure into the user-safety verdict unless the leaked credential creates a credible user-impacting path.
+- Do not let dependency hygiene findings such as a missing lockfile automatically change the user-safety verdict.
+- Raise the user-safety verdict only when maintainer exposure or supply-chain weakness forms a credible path to user harm, downstream package poisoning, malicious install behavior, or sensitive data exposure.
+
+Risk-level scales:
+
+| Signal | Levels | Meaning |
+|------|------|------|
+| `User Safety Verdict` | `Safe` / `Risky` / `Dangerous` | Whether current static evidence shows user-impacting malicious behavior, backdoors, or suspicious chains |
+| `Maintainer Exposure` | `Low` / `Medium` / `High` / `Critical` | Whether repository contents expose maintainers, CI, publishing, cloud, or internal infrastructure |
+| `Supply Chain Risk` | `Low` / `Medium` / `High` / `Critical` | Whether future installs, dependency resolution, CI, or release paths are exposed to package poisoning or drift |
+
+#### 3.1.2 Persistent State and Agent Control Surface Review
 
 Run this review after the offline supplemental checks for all repositories.
 
@@ -262,6 +290,60 @@ Important qualification rules:
 - classify as higher risk when writes are silent, auto-applied, poorly scoped, or able to persist into future sessions without explicit operator review
 - if a repository encourages autonomous updates to persistent control files, evaluate whether that behavior is minimally justified by the claimed purpose
 
+#### 3.1.3 Supply Chain Determinism and Dependency Watch Review
+
+Run this review for all repositories that contain dependency manifests, lockfiles, CI configuration, Dockerfiles, installers, or release automation.
+
+Inspect dependency determinism:
+
+1. manifest and lockfile pairing
+   - Node.js: `package.json` with `package-lock.json`, `npm-shrinkwrap.json`, `yarn.lock`, or `pnpm-lock.yaml`
+   - Python: `pyproject.toml`, `requirements.txt`, or `Pipfile` with `uv.lock`, `poetry.lock`, `requirements.txt` pins, or `Pipfile.lock`
+   - Rust: `Cargo.toml` with `Cargo.lock` when the repository is an application or installable tool
+   - Go: `go.mod` with `go.sum`
+   - Ruby: `Gemfile` with `Gemfile.lock`
+   - Docker: base images pinned by immutable digest when practical
+2. floating or weak version constraints
+   - `latest`, `*`, branch refs, broad ranges, unbounded `>=`, npm `^` or `~`, Git URLs without commit SHA, and Docker tags without digest
+3. lockfile-respecting installs
+   - prefer deterministic commands such as `npm ci`, `pnpm install --frozen-lockfile`, `yarn install --immutable`, `uv sync --locked`, `poetry install --sync`, `cargo build --locked`, or equivalent project-native frozen mode
+   - flag docs or CI that use upgrade-oriented commands such as `pip install -U` or delete/regenerate lockfiles during install
+4. GitHub Actions and CI pinning
+   - flag actions pinned only to branches or mutable tags such as `@main`, `@master`, or broad major tags
+   - prefer full commit SHA for high-trust release, publish, or secret-bearing workflows
+5. registry and dependency-confusion surface
+   - inspect `.npmrc`, `.yarnrc.yml`, `pip.conf`, `pyproject.toml`, package scopes, and CI registry config
+   - flag private-looking unscoped package names, mixed public/private registries, missing scope-to-registry mapping, or fallback-to-public behavior
+6. execution amplifiers
+   - identify lifecycle scripts, native binary downloads, remote installer scripts, `curl | sh`, package publish workflows, and tag-triggered release automation
+
+Notable dependency rules:
+
+- List concrete package names that materially contribute to supply-chain risk.
+- Include package name, ecosystem, manifest source, version constraint, lockfile-resolved version when available, and reason to watch.
+- Do not label a package malicious merely because it has prior compromise history.
+- If a known affected version is present in a manifest or lockfile and that knowledge comes from current online vulnerability intelligence or another reliable user-provided source, raise `Supply Chain Risk` to `Critical` and explain whether it changes the `User Safety Verdict`.
+- If a high-interest package is floating or unlocked, flag it as a notable dependency even when no current malicious chain is found.
+
+High-interest package examples:
+
+- LLM gateways, model clients, plugin loaders, browser automation packages, wallet/key-management libraries, installer/build tooling, CI/release tooling, and packages with install hooks or native binary downloads
+- `litellm` is an example of a package category worth watching because AI infrastructure packages can become high-value supply-chain targets. In offline mode, record the exact version constraint and lockfile-resolved version when available, but do not claim current compromise status or affected-version accuracy unless online vulnerability intelligence has been explicitly authorized and checked.
+
+Offline evidence boundary:
+
+- The skill may flag package categories, missing lockfiles, floating ranges, install scripts, and known examples documented in the skill text.
+- The skill must not claim to know the latest malicious package versions, advisories, or compromise status from offline static analysis alone.
+- If affected-version freshness matters, ask for online vulnerability intelligence and clearly separate those results from the offline audit.
+
+Supply-chain risk guidance:
+
+- missing lockfile alone -> usually `Medium` supply-chain risk, with no automatic change to `User Safety Verdict`
+- missing lockfile plus floating dependency ranges -> usually `Medium`
+- missing lockfile plus lifecycle scripts, native binary downloads, or release automation -> usually `High`
+- remote download-and-execute install path, unpinned secret-bearing CI action, or publish-chain exposure -> `High` or `Critical` depending on reachability
+- confirmed malicious install or exfiltration chain -> `Dangerous` user-safety verdict and `Critical` supply-chain risk
+
 #### 3.2 Online Vulnerability Intelligence
 
 Only if the user explicitly agrees:
@@ -281,13 +363,25 @@ Determine the verdict and write a report.
 
 #### 4.1 Determine the Verdict
 
-Choose one of the following:
+Choose the primary user-safety verdict first:
 
 | Verdict | Meaning | Standard |
 |------|------|------|
-| `Safe` | Safe | No malicious code, backdoor, or supply-chain attack was found |
-| `Risky` | Risky | Suspicious code exists but intent or impact is not fully confirmed |
-| `Dangerous` | Dangerous | Malicious behavior, backdoor logic, or credential theft is confirmed |
+| `Safe` | Safe for the potential user | No user-impacting malicious code, backdoor, or suspicious execution chain was found in current static evidence |
+| `Risky` | Risky for the potential user | Suspicious user-impacting behavior exists but intent, reachability, or impact is not fully confirmed |
+| `Dangerous` | Dangerous for the potential user | Malicious user-impacting behavior, backdoor logic, credential theft, or install-time compromise is confirmed |
+
+Then assign secondary risk signals:
+
+| Signal | Levels | Notes |
+|------|------|------|
+| `Maintainer Exposure` | `Low` / `Medium` / `High` / `Critical` | Developer or project-owner secrets may be severe even when the user-safety verdict remains `Safe` |
+| `Supply Chain Risk` | `Low` / `Medium` / `High` / `Critical` | Missing lockfiles and floating versions are future-risk signals unless they form a concrete user-impacting chain |
+
+Final-verdict rule:
+
+- Secondary risks do not automatically change the primary user-safety verdict.
+- Secondary risks should change the primary verdict only when there is a credible path from maintainer exposure or supply-chain weakness to user harm.
 
 #### 4.2 Write the Report
 
@@ -317,7 +411,9 @@ Report format:
 date: YYYY-MM-DD
 target: <target-name>
 source: <GitHub URL or local path>
-result: <Safe/Risky/Dangerous>
+user_safety_verdict: <Safe/Risky/Dangerous>
+maintainer_exposure: <Low/Medium/High/Critical>
+supply_chain_risk: <Low/Medium/High/Critical>
 tags:
   - security-audit
 ---
@@ -327,6 +423,25 @@ tags:
 ## Project Overview
 
 <basic information>
+
+## Final Risk Summary
+
+User Safety Verdict:
+<Safe / Risky / Dangerous, from the potential user's perspective>
+
+Maintainer Exposure:
+<Low / Medium / High / Critical, with one-sentence reason>
+
+Supply Chain Risk:
+<Low / Medium / High / Critical, with one-sentence reason>
+
+Overall Recommendation:
+<Installable / Use Caution / Do Not Install, primarily driven by user-safety verdict and adjusted only when secondary risks create a credible user-impacting path>
+
+Role-Specific Impact:
+- User Impact: <impact on installer or end user>
+- Maintainer Impact: <impact on developer, owner, CI, publishing, or infrastructure>
+- Ecosystem Impact: <impact on downstream package users or future installs>
 
 ## Source and Credibility
 
@@ -366,6 +481,54 @@ Purpose Fit:
 ### Offline Supplemental Checks
 <CI/CD, documentation command traps and prompt injection, secrets, environment variables, network request safety, filesystem safety, command execution, and persistence findings>
 
+## Maintainer Exposure
+
+Leaked or Sensitive Entities:
+<developer secrets, CI tokens, cloud keys, publish credentials, internal endpoints, or "None">
+
+Affected Role:
+<maintainer, project owner, CI/CD, downstream users, or "Not Applicable">
+
+User-Impact Path:
+<whether the exposure can affect users, downstream package consumers, or only maintainers>
+
+Risk Level:
+<Low / Medium / High / Critical>
+
+## Supply Chain Risk
+
+Risk Level:
+<Low / Medium / High / Critical>
+
+Manifest Files:
+<dependency manifests found, or "None">
+
+Lockfiles:
+<lockfiles found or missing, or "None">
+
+Unpinned or Floating Dependencies:
+<specific packages, ranges, mutable tags, Git refs, Docker tags, or "None">
+
+Notable Dependencies:
+| Package | Ecosystem | Source | Version Constraint | Resolved Version | Reason to Watch |
+|---|---|---|---|---|---|
+| <name> | <npm/PyPI/etc.> | <manifest/lockfile> | <constraint> | <resolved or unknown> | <reason> |
+
+Affected or High-Risk Versions:
+<known affected versions found in manifests or lockfiles; write "None" when empty>
+
+Install Determinism:
+<whether docs and CI use lockfile-respecting install commands>
+
+Registry and Dependency-Confusion Surface:
+<public/private registry mixing, unscoped internal-looking packages, or "None">
+
+Execution Amplifiers:
+<install hooks, native downloads, remote scripts, CI publish paths, or "None">
+
+Effect on User Safety Verdict:
+<None / Raises to Risky / Raises to Dangerous, with reason>
+
 ## CIK Classification
 
 ### Capability
@@ -385,11 +548,7 @@ Purpose Fit:
 
 ## Installation Recommendation
 
-<for skill or agent installation scenarios, write Installable / Use Caution / Do Not Install with a reason; otherwise write Not Applicable>
-
-## Final Verdict
-
-<Safe / Risky / Dangerous, with reasoning>
+<for skill or agent installation scenarios, write the action the potential user should take and the concrete changes that would reduce risk; otherwise write Not Applicable. Do not repeat the full risk verdict here; the verdict belongs in Final Risk Summary.>
 ```
 
 ### Step 5: Clean Up Temporary Files
@@ -416,6 +575,11 @@ Audit complete.
 
 Target: <GitHub URL or local path>
 
+[Risk Summary]
+User Safety Verdict: <Safe / Risky / Dangerous> - <short explanation>
+Maintainer Exposure: <Low / Medium / High / Critical> - <short explanation>
+Supply Chain Risk: <Low / Medium / High / Critical> - <short explanation>
+
 [High-Risk Entities]
 <list suspicious items, or "None">
 
@@ -424,6 +588,18 @@ Target: <GitHub URL or local path>
 
 [Supplemental Security Checks]
 <offline supplemental findings; if no online check was run, explicitly say so>
+
+[Maintainer Exposure]
+Level: <Low / Medium / High / Critical>
+Findings: <developer or project-owner exposure, or "None">
+User-Impact Path: <summary or None>
+
+[Supply Chain Risk]
+Level: <Low / Medium / High / Critical>
+Notable Dependencies: <package names and reasons, or "None">
+Unpinned or Floating Dependencies: <summary or None>
+Install Determinism: <summary>
+Effect on User Safety Verdict: <None / Raises to Risky / Raises to Dangerous>
 
 [Persistent State Modification Surface]
 Touched Files: <summary or Not Applicable>
@@ -440,9 +616,6 @@ Injection/Trigger Paths: <summary or None>
 
 [Installation Recommendation]
 <Installable / Use Caution / Do Not Install for skill or agent install scenarios; otherwise Not Applicable>
-
-[Conclusion]
-<Safe / Risky / Dangerous> - <short explanation>
 
 Report saved to: ~/Security-Audit/YYYYMMDD-<target>-SecurityAudit-<verdict>.md
 ```
