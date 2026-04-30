@@ -20,6 +20,16 @@ npx skills add alondotsh/alon-skills --skill '*'
 
 ## 当前 Skills
 
+### `alon-fact-check`
+
+`alon-fact-check` 是一个事实核查 skill，用于核验 URL 或粘贴文本中的事实性声明。
+
+安装命令：
+
+```bash
+npx skills add alondotsh/alon-skills --skill alon-fact-check
+```
+
 ### `alon-github-security-audit`
 
 在默认不执行目标项目代码的前提下，对 GitHub 仓库或本地代码目录进行恶意代码、后门和供应链风险审计。
