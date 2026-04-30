@@ -1,7 +1,7 @@
 ---
 name: alon-fact-check
 description: USE WHEN user wants to verify factual claims from text or a URL with authoritative sources. Extracts explicit verifiable claims, searches primary or professional fact-checking sources, and returns a structured credibility report with links. Do not use for opinion editing, general research summaries, or advice generation.
-version: 0.1.0
+version: 0.1.1
 tags:
   - research
   - fact-checking
