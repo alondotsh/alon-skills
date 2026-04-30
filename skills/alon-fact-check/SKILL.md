@@ -51,6 +51,8 @@ Filter out: subjective opinions, vague statements, rhetorical questions, common 
 Do NOT extract implicit/derived claims — only claims explicitly stated in the source text.
 For URL or long-text input, base the claims on the source/content summary and original text, not on external search results.
 
+For comparative, ranking, or status claims, preserve the comparison metric in the extracted claim. Do not collapse ambiguous wording such as "largest", "leading", "big shareholder", "better", "top", "overtook", or "first" into a single interpretation before verification.
+
 ### Step 4: Search and Verify Each Claim
 
 For each claim, perform searches in the order that fits the claim type. Use the host's available search and browsing tools. Open and inspect sources before citing them; do not cite a search result snippet that was not verified.
@@ -120,6 +122,12 @@ If targeted searches do not settle the claim, use general authoritative search. 
 - Search for the highest-risk or most consequential claim first when there are 4-5 claims.
 - Stop searching once the verdict is well-supported within the source caps.
 
+**Comparative, ranking, and status claims**:
+- Before judging claims about relative position or replacement (for example, "largest", "top", "leading", "big shareholder", "overtook", "no longer", "best", or "first"), identify the comparison metric.
+- Do not conflate related metrics. Examples: committed investment vs paid-in investment, ownership percentage vs voting power, board seat vs control, revenue vs profit, market share vs users, benchmark score vs real-world performance, nominal value vs inflation-adjusted value.
+- If the user's wording is ambiguous, evaluate the plausible interpretations separately when possible. State which interpretation is true, false, misleading, or unverified.
+- If the metric cannot be verified from reliable sources, mark the relative-status claim as ❓ Unverified or ⚠️ Misleading rather than forcing a single conclusion.
+
 **High-stakes topics**:
 - For medical, legal, financial, public safety, or civic/policy claims, prioritize official, regulatory, primary, or peer-reviewed sources before media summaries.
 - Do not provide personalized medical, legal, financial, or safety advice. State only what the evidence supports about the claim.
@@ -156,6 +164,7 @@ For longer inputs, the report must include both:
 - If sources use different units, baselines, or ranges, report the most decision-relevant range and say it is approximate.
 - The goal is not technical detail for its own sake. The goal is to make clear: what exactly is true, under what conditions, compared with what baseline, by roughly how much, and what exception changes the answer.
 - For misleading claims, explicitly state the narrower true version of the claim.
+- For ambiguous comparative/status claims, state the metric-specific version that is true. Example: "X is larger by ownership percentage, but Y remains a major investor by committed capital" rather than simply "X is the big shareholder."
 - If the summary would lose the key nuance when shortened to one sentence, use 2-3 concise sentences.
 
 ```
@@ -239,15 +248,6 @@ For a single short claim, keep the report compact:
 
 - Output language matches the input language (Chinese input → Chinese output, English → English)
 - Headings, field labels, verdict names, and notes must also match the output language
-
-## About Alon
-
-Public skill from Alon's real daily workflows.
-
-- GitHub: https://github.com/alondotsh
-- ClawHub: https://clawhub.ai/u/alondotsh
-- X: https://x.com/alondotsh
-- WeChat Official Account: alondotsh
 - Claim extraction and search queries should match the source language
 - For Chinese claims, search in Chinese first, then supplement with English searches if needed
 - Always include direct links to sources
@@ -268,3 +268,12 @@ If the user asks whether the report is complete (for example, "没了？", "anyt
 - First answer directly whether the core fact-check is complete.
 - Then provide at most 3-4 concise supplemental data points only if they materially clarify the verdict.
 - Do not add new unsupported claims, advice, or a second full report unless the user asks for deeper follow-up.
+
+## About Alon
+
+Public skill from Alon's real daily workflows.
+
+- GitHub: https://github.com/alondotsh
+- ClawHub: https://clawhub.ai/u/alondotsh
+- X: https://x.com/alondotsh
+- WeChat Official Account: alondotsh
