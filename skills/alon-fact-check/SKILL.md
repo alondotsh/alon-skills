@@ -1,7 +1,7 @@
 ---
 name: alon-fact-check
-description: USE WHEN user wants to verify factual claims from text or a URL with authoritative sources. Extracts explicit verifiable claims, searches primary or professional fact-checking sources, and returns a structured credibility report with links. Do not use for opinion editing, general research summaries, or advice generation.
-version: 0.1.1
+description: USE WHEN user wants to verify factual claims from text or a URL with authoritative sources, or trace a claim back to its original or official source URL. Extracts explicit verifiable claims, searches primary or professional fact-checking sources, and returns a structured credibility report or source trace with links. Do not use for opinion editing, general research summaries, or advice generation.
+version: 0.1.2
 tags:
   - research
   - fact-checking
@@ -19,6 +19,7 @@ Verify the credibility of information by finding authoritative sources with link
 The user provides either:
 - **Text**: A claim, paragraph, or article content to fact-check
 - **URL**: A link to a web page whose content needs fact-checking
+- **Source tracing request**: A claim or quote where the user wants the original, official, or earliest reliable source URL
 
 ## Workflow
 
@@ -26,6 +27,60 @@ The user provides either:
 
 - If input is a URL: use the host's available web reader, browser, or search tools to fetch readable page content. If the page cannot be accessed, ask the user to paste the relevant text.
 - If input is text: use directly
+- If the user asks to find the original source, official source, primary URL, earliest source, citation source, or where a claim came from, use **Source Tracing Mode** before the normal fact-check report.
+
+### Source Tracing Mode
+
+Use this mode when the user's main goal is to locate the source of a claim rather than score the whole source's reliability. Example requests include "find the official source", "trace this claim", "where did this number come from", "original URL", "官方出处", "原始出处", "溯源", "源头", or "出处链接".
+
+**Goal**:
+- Find the most authoritative original or official URL that directly supports the exact claim.
+- Distinguish between the original source, official confirmation, secondary reporting, and copied/aggregated mentions.
+- Include useful secondary mentions such as articles, social posts, newsletters, or reposts when they help explain where the user may have seen the claim or how the claim spread.
+- Preserve the exact claim, including amounts, dates, eligibility conditions, product names, scope, and quoted wording.
+- If no original source is found, return the best available source and clearly say what is missing.
+
+**Search strategy**:
+- Start with exact-phrase searches for the distinctive words, numbers, product names, and quoted fragments in the claim.
+- Search likely official domains before general media when the entities are known. Examples: `site:cloudflare.com`, `site:stripe.com`, `site:support.stripe.com`, official docs, press releases, support pages, filings, or original research pages.
+- Use reverse-citation tracing: when a secondary article links or names a source, open that source and continue until the earliest official or primary source is reached.
+- For monetary amounts, eligibility promises, product terms, discounts, credits, limits, dates, or partner benefits, prefer official terms, support pages, announcement blogs, partner pages, or archived official pages over media coverage.
+- Keep a short source chain: user-provided claim or source -> inspected secondary mention if relevant -> official/original source.
+- Do not call a secondary article, social post, or repost the "source", "origin", or "传播源头" unless the user provided it as their source or the searched evidence establishes it as the earliest known source. If it was merely found during search, label it as `found secondary mention`, `传播节点`, or `用户可能看到的传播节点`.
+- When listing inspected secondary mentions or propagation nodes, include URLs for a few representative examples so the user can open and compare how the claim is spreading. Prefer 1-3 typical links over a long dump.
+
+**Classification**:
+- `Official original source`: first-party page from the relevant organization that directly states the claim.
+- `Official confirmation`: first-party page that confirms the claim but may not be the earliest source.
+- `Primary non-official source`: original paper, filing, dataset, court record, transcript, or direct artifact.
+- `Secondary source`: article, blog, newsletter, social post, or aggregator that reports the claim but is not the source of record.
+- `Found secondary mention`: a searched and inspected article, post, newsletter, or repost that carries the claim but is not proven to be the user's source or the earliest source.
+- `Not found`: no source directly supporting the exact claim was found.
+
+**Trace confidence**:
+- `High`: an official, primary, or first-party source directly supports, contradicts, or narrows the exact claim.
+- `Medium`: a reliable secondary source is found, or an official/primary source supports only part of the claim.
+- `Low`: only reposts, social posts, vague mentions, inaccessible pages, or broken source chains are found.
+- Trace confidence describes the reliability of the source chain, not the claim's truthfulness. If a fact-check verdict is also provided, keep claim credibility separate as `Credibility`.
+
+**Output format**:
+
+```
+## Source Trace
+
+**Claim**: [exact claim being traced]
+**Best Source**: [title] [Official original source / Official confirmation / Primary non-official source / Secondary source / Found secondary mention / Not found]
+URL
+**Why This Source**: [1-2 sentences explaining why it is the best source and whether it directly states the claim]
+**Source Chain**:
+- [user-provided claim or source if available]
+- [found secondary mention or intermediate source if relevant, with label and URL]
+- [official/original source]
+**Trace Confidence**: High / Medium / Low
+**Notes**: [missing conditions, ambiguity, archive/access limitations, or whether the source only partially supports the claim]
+```
+
+If the user also asks whether the claim is true, continue into the normal fact-check workflow after the source trace and include a compact verdict.
 
 ### Step 2: Understand Source Content
 
