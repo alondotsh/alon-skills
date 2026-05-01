@@ -1,8 +1,8 @@
 # alon-fact-check
 
-`alon-fact-check` is a fact-checking skill for verifying factual claims from a URL or pasted text.
+`alon-fact-check` is a fact-checking and source-tracing skill for verifying factual claims from a URL or pasted text.
 
-It extracts explicit, verifiable claims, checks them against authoritative sources, and returns a structured report with verdicts, credibility ratings, source links, and key qualifiers.
+It extracts explicit, verifiable claims, checks them against authoritative sources, traces claims back to original or official source URLs, and returns a structured report with verdicts, credibility ratings, source links, and key qualifiers.
 
 [简体中文](./README.zh.md)
 
@@ -20,6 +20,7 @@ Use this skill when the user wants to:
 - Check a URL, article, post, or pasted paragraph for factual reliability.
 - Compare a claim against official, primary, peer-reviewed, or professional fact-checking sources.
 - Understand the narrower accurate version of an overbroad or misleading claim.
+- Trace a claim, quote, number, or partner benefit back to its original or official source URL.
 
 Do not use it for opinion editing, general research summaries, lifestyle advice, or personalized medical/legal/financial advice.
 
@@ -42,14 +43,31 @@ For long pasted text, article-like text, transcripts, or multi-paragraph input, 
 
 For short direct claims, the summary field is omitted so the report stays compact.
 
+### Source Tracing
+
+For source tracing requests, the skill searches for the original, official, or earliest reliable source behind a claim.
+
+Use this when the user asks for:
+
+- original source
+- official source
+- source URL
+- where a number or quote came from
+- `官方出处`
+- `原始出处`
+- `溯源`
+
+The source trace distinguishes official sources from secondary mentions, social posts, reposts, and other propagation nodes. When useful, it includes 1-3 representative secondary URLs so the user can compare how the claim is spreading.
+
 ## Workflow
 
 1. Parse the input as either URL or text.
-2. Understand the source content when the input is a URL or long text.
-3. Extract 1-5 explicit, verifiable claims.
-4. Search authoritative sources, including contradiction-oriented searches for controversial claims.
-5. Classify each claim as true, misleading, false, or unverified.
-6. Assemble a clean final report once, with no duplicated claim sections or mismatched sources.
+2. If the user asks for source tracing, find the best original or official source and return a source trace.
+3. Understand the source content when the input is a URL or long text.
+4. Extract 1-5 explicit, verifiable claims.
+5. Search authoritative sources, including contradiction-oriented searches for controversial claims.
+6. Classify each claim as true, misleading, false, or unverified.
+7. Assemble a clean final report once, with no duplicated claim sections or mismatched sources.
 
 ## Output Shape
 
@@ -75,6 +93,27 @@ Sources:
 ```
 
 For non-English output, labels and wording should match the user's language consistently.
+
+For source tracing requests, the report uses a source-chain shape:
+
+```text
+Source Trace
+
+Claim: ...
+Best Source: ... [Official original source / Official confirmation / Primary non-official source / Secondary source / Found secondary mention / Not found]
+URL
+Why This Source: ...
+Source Chain:
+- User-provided claim or source
+- Found secondary mention or intermediate source [label]
+  URL
+- Official/original source
+  URL
+Trace Confidence: High / Medium / Low
+Notes: ...
+```
+
+`Trace Confidence` describes the reliability of the source chain, not the claim's truthfulness. If the skill also performs fact-checking, claim truthfulness is reported separately as `Credibility`.
 
 ## Summary Quality
 

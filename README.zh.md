@@ -22,7 +22,7 @@ npx skills add alondotsh/alon-skills --skill '*'
 
 ### `alon-fact-check`
 
-`alon-fact-check` 是一个事实核查 skill，用于核验 URL 或粘贴文本中的事实性声明。
+`alon-fact-check` 是一个事实核查和原始出处溯源 skill，用于核验 URL 或粘贴文本中的事实性声明。
 
 安装命令：
 
